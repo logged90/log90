@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/hud.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+    <div class="authorization" v-if="active" v-cloak>
+        <div class="top-container">
+            <div class="header-block"><span class="header">Авторизация на <br /></span><span class="server">Renaissance RolePlay</span></div>
+            <img class="logo" src="images/logotype.png" />
+        </div>
+        <input v-model="login" type="text" name="login" readonly>
+        <input id="lpassword" v-model="password" type="password" name="pass" :placeholder="placeholder" maxlength="32">
+        <img class="eye" :src="eye" @click="eyeStatus()" />
+        <div class="button" @click="authorization(password)">Войти</div>
+    </div>
+    <div class="registration" v-if="active" v-cloak>
+        <div class="top-container">
+            <div class="header-block"><span class="header">Регистрация на <br /></span><span class="server">Renaissance RolePlay</span></div>
+            <img class="logo" src="images/logotype.png" />
+        </div>
+        <input v-model="login" type="text" name="login" readonly>
+        <input id="rpassword" v-model="pass" type="password" name="pass" :placeholder="pass_placeholder" maxlength="32">
+        <img class="eye" :src="eye" @click="eyeStatus()" />
+        <input v-model="mail" type="text" name="mail" :placeholder="mail_placeholder">
+        <input v-model="referral" type="text" name="referral" placeholder="Ник пригласившего">
+        <div class="selectsex-container">
+            <div class="selectsex-button-block">
+                <div class="selectsex-button" @click="sex = 1" :class="{ 'active': isActiveSex(1) }">Мужской</div>
+            </div>
+            <div class="selectsex-button-block">
+                <div class="selectsex-button" @click="sex = 2" :class="{ 'active': isActiveSex(2) }">Женский</div>
+            </div>
+            <div class="selectsex-header">Выберите пол:</div>
+            <img class="selectsex-icon" src="images/selectsex.svg" />
+        </div>
+        <div class="button" @click="registration(pass, mail, sex)" style="margin-top: 2.5vh;">Войти</div>
+    </div>
+    <div class="interface-hud" v-if="active" v-cloak>
+        <div class="server-info-block">
+            <div class="server-info">
+                <img class="server-info-icon" src="images/hud/server.svg" />{{ server }}ㅤ
+                <img class="server-info-icon" src="images/hud/online.svg" />{{ online }}
+                ㅤID: {{ playerId }}
+            </div>
+        </div>
+        <div class="hud">
+            <div class="logotype-container">
+                <img class="logotype" src="images/hud/logotype.svg" />
+
+                <img v-if="wanted !== 'images/hud/wanted/0.png'" class="wanted" :src="wanted">
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-block">
+                    <svg viewBox="0 0 100 100" stroke-linecap="round" style="transform: rotate(-90deg);">
+                        <circle class="progress-bg" cx="50" cy="50" r="40" fill="none" />
+                        <circle id="health" class="progress" cx="50" cy="50" r="40" fill="none" stroke="#FFF" />
+                    </svg>
+                    <img class="circle-progress-icon" src="images/hud/hp.svg" style="position: absolute; width: 2.8vh; top: 2.5vh; left: 2.3vh" />
+                    <p class="circle-progress-indicator">{{ health }}%</p>
+                </div>
+
+                <div class="progress-bar-block">
+                    <svg viewBox="0 0 100 100" stroke-linecap="round" style="transform: rotate(-90deg);">
+                        <circle class="progress-bg" cx="50" cy="50" r="40" fill="none" />
+                        <circle id="armour" class="progress" cx="50" cy="50" r="40" fill="none" stroke="#FFF" />
+                    </svg>
+                    <img class="circle-progress-icon" src="images/hud/arm.svg" style="position: absolute; width: 2.5vh; top: 2.55vh; left: 2.5vh" />
+                    <p class="circle-progress-indicator">{{ armour }}%</p>
+                </div>
+            </div>
+            <div class="weapon-container" v-if="weapon !== 'images/hud/weapon/0.png'">
+                <div class="rectangle965"></div>
+
+                <div class="weapon-name" :style="['images/hud/weapon/1.png', 'images/hud/weapon/2.png', 'images/hud/weapon/3.png', 'images/hud/weapon/4.png', 'images/hud/weapon/5.png', 'images/hud/weapon/6.png', 'images/hud/weapon/7.png', 'images/hud/weapon/8.png', 'images/hud/weapon/10.png', 'images/hud/weapon/15.png', 'images/hud/weapon/46.png'].some(w => weapon.includes(w)) ? 'top: 3.2vh' : '' ">{{ weaponName }}</div>
+
+                <img class="weapon-icon" :src="weapon" />
+
+                <div v-if="!weapon.includes('images/hud/weapon/1.png') && !weapon.includes('images/hud/weapon/2.png') && !weapon.includes('images/hud/weapon/3.png') && !weapon.includes('images/hud/weapon/4.png') && !weapon.includes('images/hud/weapon/5.png') && !weapon.includes('images/hud/weapon/6.png') && !weapon.includes('images/hud/weapon/7.png') && !weapon.includes('images/hud/weapon/8.png') && !weapon.includes('images/hud/weapon/10.png') && !weapon.includes('images/hud/weapon/15.png') && !weapon.includes('images/hud/weapon/46.png')" class="ammo-block">
+                    <p><a>{{ ammo }}</a>{{ max_ammo }}<img class="ammo-icon" src="images/hud/ammo.svg" /></p>
+                </div>
+            </div>
+            <div class="money-container" :style="{top: weapon !== 'images/hud/weapon/0.png' ? '38.8vh' : '28.8vh'}">
+                <div class="money">{{ money }}</div>
+                <img src="images/hud/wallet.svg" />
+            </div>
+        </div>
+    </div>
+<style>
+body {
+    overflow: hidden;
+    user-select: none;
+    -ms-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+}
+</style>
+<script src="script/vue.js"></script>
+<script src="script/index.js"></script>
+<script src="script/authorization.js"></script>
+</body>
+</html>
